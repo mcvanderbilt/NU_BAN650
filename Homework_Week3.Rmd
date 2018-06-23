@@ -1,0 +1,107 @@
+---
+title: "BAN650 - Week 3 Homework - R Markdown"
+author: "Matthew C. Vanderbilt"
+date: "June 18, 2018"
+output: pdf_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+## INSTALL GENERAL LIBRARIES IF NOT ALREADY INSTALLED
+# knitr: A General-Purpose Package for Dynamic Rpeort Generation in R
+require("knitr") || install.packages("knitr") 
+# rmarkdown: Dynamic Documents for R
+require("rmarkdown") || install.packages("rmarkdown")
+# tinytex: Helper Functions to Install and Maintain 'TeX Live' and Compile 'LaTex' Documents - used with knitr / rmarkdown; also install http://miktex.org/2.9/setup
+require("tinytex") || install.packages("tinytex")
+
+# INSTALL FINANCIAL DATA LIBRARIES
+# quantmod: QUantitative Financial Modeling Framework
+require("quantmod") || install.packages("quantmod")
+# set options
+options("getSymbols.yahoo.warning"=FALSE)
+options("getSymbols.warning4.0"=FALSE)
+
+# INSTALL Quandl API
+# Quandl: API Wrapper for Quandl.com
+require("Quandl") || install.packages("Quandl")
+```
+
+```{r Get Sempra Energy Stock Data, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Get Sempra Energy Stock Data (my old parent company)
+stockSRE <- getSymbols(Symbols = "SRE", src = "yahoo", auto.assign=FALSE)
+dim(stockSRE)
+str(stockSRE)
+head(stockSRE, n = 2)
+head(stockSRE)
+tail(stockSRE)
+plot(stockSRE, 
+     main="Sempra Energy Stock Price (SRE)", 
+     type="l", 
+     col="blue",
+     xlab="Period",
+     ylab="Volume")
+
+#-> moved to end due to page length: Hi(stockSRE)
+print("Moved Hi(stockSRE) to the end due to data length")
+
+# Add Date Filter to Minimize Printing
+start.date = as.POSIXct("2017-01-01")
+end.date = as.POSIXct("2018-12-31")
+stockSRE[paste(start.date,end.date,sep="::")][,2]
+head(stockSRE$SRE.High, n = 24)
+
+#-> moved to end due to page legth: OHLC(stockSRE)
+print("Moved OHLC(stockSRE) to the end due to data length")
+
+plot(Vo(stockSRE))
+```
+
+```{r Get Multiple Stock Sets - California IOUs, include=TRUE}
+# Direct Method
+calUtils <- getSymbols(Symbols = c("SRE","EIX","PGE"), auto.assign = TRUE)
+dim(calUtils)
+head(calUtils)
+
+# Data Environ Method
+calIOUs <- new.env()
+getSymbols(c("SRE","EIX","PGE"), env = calIOUs, auto.assign = TRUE)
+head(calIOUs$SPY)
+```
+
+```{r Quandl Example, include=TRUE}
+# 10-Year Treasuring Constant Maturity Rate
+cnstMatRate <- Quandl(code = "FRED/DGS10")
+cnstMatRateXTS <- Quandl(code = "FRED/DGS10", type = "xts")
+dim(cnstMatRate)
+str(cnstMatRate)
+head(cnstMatRate)
+tail(cnstMatRate)
+plot(cnstMatRate)
+View(cnstMatRate)
+View(cnstMatRateXTS)
+
+# Unemployment Rate
+unemployRate <- getSymbols("UNRATE", src = "FRED", auto.assign = FALSE)
+dim(unemployRate)
+str(unemployRate)
+head(unemployRate)
+tail(unemployRate)
+plot(unemployRate)
+View(unemployRate)
+
+# Specific Data Pull
+# CME/CLH2017 = Crude Oil Futures, March 2017 (https://www.quandl.com/data/CME/CLH2017-Crude-Oil-Futures-March-2017-CLH2017)
+# CME/BZH2017 = Brent Crude Oil Financial Futures, March 2017 (https://www.quandl.com/data/CME/BZH2017-Brent-Crude-Oil-Financial-Futures-March-2017-BZH2017)
+oilFuture <- Quandl(code = c("CME/CLH2017", "CME/BZH2017"), type = "xts")
+clhOpen <- getPrice(oilFuture, symbol = "CLH2017", prefer = "open")
+View(clhOpen)
+```
+```{r Print Stock Data - Moved to End}
+Hi(stockSRE)
+
+OHLC(stockSRE)
+```
